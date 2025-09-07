@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NEXT_DISABLE_SOURCEMAPS=true next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "next build",
+    "postinstall": "npm run build",
     "vercel-build": "node scripts/screw-protection.js && next build",
-    "keep-alive": "node scripts/keep-alive.js"
+    "keep-alive": "node scripts/keep-alive.js",
+    "netlify-build": "NEXT_DISABLE_SOURCEMAPS=true next build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
