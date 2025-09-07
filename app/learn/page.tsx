@@ -229,7 +229,7 @@ export default function LearnPage() {
           </div>
           <Progress value={progressPercentage} className="h-2" />
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            You've completed {completedCards} out of {islCards.length} lessons
+            You&apos;ve completed {completedCards} out of {islCards.length} lessons
           </p>
         </CardContent>
       </Card>
@@ -259,7 +259,7 @@ export default function LearnPage() {
       {/* ISL Cards Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
         {filteredCards.map((card) => (
-          <Card key={card.id} className={`overflow-hidden ${card.locked ? 'opacity-60' : 'hover:shadow-lg'} transition-all`}>
+          <Card key={card.id} className={`overflow-hidden ${card.locked ? "opacity-60" : "hover:shadow-lg"} transition-all`}>
             <div className="relative">
               <div className="aspect-square bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
                 <Image
@@ -332,9 +332,9 @@ export default function LearnPage() {
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Augmented Reality Coming Soon!
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4 max-w-2xl mx-auto">
-              We're working on integrating ARCore and 3D gesture visualization to provide an immersive 
-              learning experience. Soon you'll be able to practice ISL gestures in augmented reality 
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 max-w-2xl mx-auto">
+              We&apos;re working on integrating ARCore and 3D gesture visualization to provide an immersive 
+              learning experience. Soon you&apos;ll be able to practice ISL gestures in augmented reality 
               with real-time feedback and guidance.
             </p>
             <div className="flex flex-wrap gap-2 justify-center">
