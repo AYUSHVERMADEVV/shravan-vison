@@ -34,6 +34,7 @@ export default function TranslatePage() {
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
+    // Cleanup function to stop camera when component unmounts
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
@@ -41,7 +42,29 @@ export default function TranslatePage() {
     };
   }, []);
 
+  // Effect to handle video display issues
+  useEffect(() => {
+    if (isVideoActive && videoRef.current && streamRef.current) {
+      // Ensure video element is properly connected to stream
+      if (!videoRef.current.srcObject) {
+        videoRef.current.srcObject = streamRef.current;
+      }
+      
+      // Try to play the video
+      videoRef.current.play().catch(err => {
+        console.warn("Video play error in effect:", err);
+      });
+    }
+  }, [isVideoActive]);
+
   const startCamera = async () => {
+    // Check if browser supports getUserMedia
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast.error('Your browser does not support camera access');
+      console.error('getUserMedia is not supported in this browser');
+      return;
+    }
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: 'user' }, 
@@ -50,9 +73,19 @@ export default function TranslatePage() {
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play().catch((err) =>
-          console.warn("Autoplay blocked:", err)
-        );
+        videoRef.current.style.display = 'block';
+        try {
+          await videoRef.current.play();
+        } catch (err) {
+          console.warn("Autoplay blocked:", err);
+          // Try to play again after user interaction
+          videoRef.current.addEventListener('canplay', () => {
+            videoRef.current?.play().catch(e => console.error("Play error:", e));
+          });
+          
+          // Show a message to the user
+          toast('Click on the video to start the camera feed');
+        }
       }
       
       streamRef.current = stream;
@@ -245,11 +278,17 @@ export default function TranslatePage() {
                   autoPlay
                   muted
                   playsInline
-                  style={{ width: "100%", height: "100%", objectFit: "cover", backgroundColor: "black" }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", backgroundColor: "black", display: "block" }}
                   onLoadedMetadata={() => {
-                    videoRef.current?.play().catch((err) =>
-                      console.warn("Autoplay blocked:", err)
-                    );
+                    try {
+                      videoRef.current?.play();
+                    } catch (err) {
+                      console.warn("Autoplay blocked:", err);
+                    }
+                  }}
+                  onClick={() => {
+                    // Ensure video plays on user interaction
+                    videoRef.current?.play().catch(err => console.error("Play error:", err));
                   }}
                 />
               ) : (
