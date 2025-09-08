@@ -24,9 +24,6 @@ const nextConfig = {
     ];
     
     return config;
-  },
-  experimental: {
-    serverComponentsExternalPackages: ['@supabase/supabase-js']
   }
 };
 
