@@ -1,10 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+if (!supabaseUrl || !supabaseAnonKey || 
+    supabaseUrl === 'your_supabase_url_here' || 
+    supabaseAnonKey === 'your_supabase_anon_key_here' ||
+    supabaseUrl === 'https://your-project-ref.supabase.co' ||
+    supabaseAnonKey === 'your-anon-key-here') {
+  console.error('⚠️  Supabase configuration required!');
+  console.error('Please update your .env.local file with your actual Supabase credentials:');
+  console.error('1. Go to https://supabase.com/dashboard');
+  console.error('2. Select your project');
+  console.error('3. Go to Settings > API');
+  console.error('4. Copy your Project URL and anon key to .env.local');
+  throw new Error('Missing or invalid Supabase environment variables. Please check your .env.local file.');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
