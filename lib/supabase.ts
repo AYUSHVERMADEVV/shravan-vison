@@ -4,10 +4,10 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey || 
-    supabaseUrl === 'https://ohamqpoblontdzdcyije.supabase.co' || 
-    supabaseAnonKey === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oYW1xcG9ibG9udGR6ZGN5aWplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwOTMzMzgsImV4cCI6MjA3MjY2OTMzOH0.2MEIn0iplhASnya3ADUusAejBwHwRKV5VRwhbSHuBl8' ||
-    supabaseUrl === 'https://your-project-ref.supabase.co' ||
-    supabaseAnonKey === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oYW1xcG9ibG9udGR6ZGN5aWplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwOTMzMzgsImV4cCI6MjA3MjY2OTMzOH0.2MEIn0iplhASnya3ADUusAejBwHwRKV5VRwhbSHuBl8') {
+    supabaseUrl === '' || 
+    supabaseAnonKey === '' ||
+    supabaseUrl === '' ||
+    supabaseAnonKey === '') {
   console.error('⚠️  Supabase configuration required!');
   console.error('Please update your .env.local file with your actual Supabase credentials:');
   console.error('1. Go to https://supabase.com/dashboard');
