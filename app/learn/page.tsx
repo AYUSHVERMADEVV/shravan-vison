@@ -15,7 +15,6 @@ import {
   Target
 } from 'lucide-react';
 import { Zap } from 'lucide-react';
-import Image from 'next/image';
 
 interface ISLCard {
   id: number;
@@ -262,11 +261,10 @@ export default function LearnPage() {
           <Card key={card.id} className={`overflow-hidden ${card.locked ? "opacity-60" : "hover:shadow-lg"} transition-all`}>
             <div className="relative">
               <div className="aspect-square bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
-                <Image
+                <img
                   src={card.imageUrl}
                   alt={`ISL gesture for ${card.word}`}
-                  fill
-                  className="object-cover"
+                  className="w-full h-full object-cover"
                 />
                 {card.locked && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
