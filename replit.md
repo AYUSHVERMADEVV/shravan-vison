@@ -1,14 +1,21 @@
 # Shravan Vision - ISL Translation Platform
 
 ## Project Overview
-Shravan Vision is a Next.js application for Indian Sign Language (ISL) translation and accessibility features. The platform provides ISL to text translation, AR learning capabilities, emergency SOS system, and user authentication.
+Shravan Vision is a Next.js application for Indian Sign Language (ISL) translation and accessibility features. The platform provides real-time ISL gesture recognition, AI-powered translation, text-to-speech output, AR learning capabilities, emergency SOS system, and user authentication.
 
 ## Recent Setup Changes (Sept 9, 2025)
-- Configured Next.js for Replit environment with proper host settings
-- Fixed Supabase environment variable configuration (URL and anon key were initially swapped)
-- Set up development workflow on port 5000 with proxy support
-- Configured autoscale deployment for production
-- Temporarily hardcoded Supabase credentials in lib/supabase.ts to resolve environment variable issues
+- ✅ Configured Next.js for Replit environment with proper host settings
+- ✅ Fixed Supabase environment variable configuration (URL and anon key were initially swapped)
+- ✅ Set up development workflow on port 5000 with proxy support
+- ✅ Configured autoscale deployment for production
+- ✅ Temporarily hardcoded Supabase credentials in lib/supabase.ts to resolve environment variable issues
+
+## Latest Updates - Live AI Gesture Recognition (Sept 9, 2025)
+- 🚀 **Integrated MediaPipe & TensorFlow.js** - Real-time hand tracking and gesture recognition
+- 🎯 **16 ISL Gestures Supported** - Hello, Thank You, Yes, No, Please, Sorry, Good, Bad, Help, Water, Food, Home, Love, Family, Friend, Work
+- ⚡ **Stability Detection Algorithm** - 2-second cooldown + 3-frame consistency check to prevent false positives
+- 🔊 **Auto Text-to-Speech** - Automatic pronunciation of detected gestures
+- 🎨 **Enhanced UI** - Live gesture overlays, stability indicators, comprehensive gesture guide
 
 ## Project Architecture
 

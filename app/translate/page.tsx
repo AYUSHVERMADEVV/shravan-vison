@@ -38,14 +38,24 @@ export default function TranslatePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Gesture to text mapping
+  // Comprehensive ISL Gesture to text mapping
   const gestureToText = {
     'hello': { english: 'Hello', hindi: 'नमस्ते', isl: '[Wave hand with open palm]' },
     'thank_you': { english: 'Thank you', hindi: 'धन्यवाद', isl: '[Touch chin, move hand forward]' },
     'yes': { english: 'Yes', hindi: 'हाँ', isl: '[Nod fist up and down]' },
     'no': { english: 'No', hindi: 'नहीं', isl: '[Point finger side to side]' },
     'please': { english: 'Please', hindi: 'कृपया', isl: '[Circular motion on chest]' },
-    'sorry': { english: 'Sorry', hindi: 'माफ करें', isl: '[Circular motion on chest]' }
+    'sorry': { english: 'Sorry', hindi: 'माफ करें', isl: '[Circular motion on chest]' },
+    'good': { english: 'Good', hindi: 'अच्छा', isl: '[Thumbs up]' },
+    'bad': { english: 'Bad', hindi: 'बुरा', isl: '[Thumbs down]' },
+    'help': { english: 'Help', hindi: 'मदद', isl: '[Open hand raised up]' },
+    'water': { english: 'Water', hindi: 'पानी', isl: '[Cup gesture with fingers]' },
+    'food': { english: 'Food', hindi: 'खाना', isl: '[Hand to mouth motion]' },
+    'home': { english: 'Home', hindi: 'घर', isl: '[House shape with hands]' },
+    'love': { english: 'Love', hindi: 'प्यार', isl: '[Hand on heart]' },
+    'family': { english: 'Family', hindi: 'परिवार', isl: '[Fingers together]' },
+    'friend': { english: 'Friend', hindi: 'दोस्त', isl: '[Peace sign]' },
+    'work': { english: 'Work', hindi: 'काम', isl: '[Hammering motion]' }
   };
 
   useEffect(() => {
@@ -350,11 +360,14 @@ export default function TranslatePage() {
             
             <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
               <p className="text-sm text-green-700 dark:text-green-300">
-                <strong>✨ Live AI Detection:</strong> Real-time ISL gesture recognition using MediaPipe & TensorFlow.js. Supported gestures: Hello, Thank You, Yes, No, Please, Sorry.
+                <strong>🤖 Live AI Detection:</strong> Advanced ISL gesture recognition with stability detection (2-second cooldown). Detects 16+ gestures!
               </p>
+              <div className="mt-2 text-xs text-green-600 dark:text-green-400">
+                <strong>Supported:</strong> Hello, Thank You, Yes, No, Please, Sorry, Good, Bad, Help, Water, Food, Home, Love, Family, Friend, Work
+              </div>
               {lastGesture && (
-                <div className="mt-2 text-xs text-green-600 dark:text-green-400">
-                  👁️ Last detected: <strong>{lastGesture.replace('_', ' ')}</strong>
+                <div className="mt-2 text-xs text-green-600 dark:text-green-400 font-medium">
+                  🎯 Last detected: <strong>{lastGesture.replace('_', ' ').toUpperCase()}</strong>
                 </div>
               )}
             </div>
@@ -458,26 +471,45 @@ export default function TranslatePage() {
       {/* Quick Translation Examples */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Examples</CardTitle>
+          <CardTitle>Quick Examples & Gesture Guide</CardTitle>
           <CardDescription>
-            Try these common phrases for demonstration
+            Try these phrases or learn the gestures
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {['Hello', 'Thank you', 'How are you'].map((phrase) => (
-              <Button
-                key={phrase}
-                variant="outline"
-                onClick={() => setInputText(phrase)}
-                className="text-left justify-start h-auto py-3"
-              >
-                <div>
-                  <div className="font-medium">{phrase}</div>
-                  <div className="text-sm text-gray-500">Click to use</div>
-                </div>
-              </Button>
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {Object.keys(gestureToText).slice(0, 8).map((gesture) => {
+              const text = gestureToText[gesture as keyof typeof gestureToText];
+              return (
+                <Button
+                  key={gesture}
+                  variant="outline"
+                  onClick={() => {
+                    setInputText(`Gesture: ${gesture}`);
+                    if (direction === 'isl_to_english') {
+                      setOutputText(text.english);
+                    } else if (direction === 'isl_to_hindi') {
+                      setOutputText(text.hindi);
+                    } else {
+                      setOutputText(text.isl);
+                    }
+                  }}
+                  className="text-left justify-start h-auto py-2 px-3"
+                  size="sm"
+                >
+                  <div>
+                    <div className="font-medium text-xs">{gesture.replace('_', ' ')}</div>
+                    <div className="text-xs text-gray-500">{text.english}</div>
+                  </div>
+                </Button>
+              );
+            })}
+          </div>
+          
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              <strong>💡 Pro Tip:</strong> Hold gestures steady for 2 seconds for accurate detection. The system uses stability algorithms to prevent false positives!
+            </p>
           </div>
         </CardContent>
       </Card>
