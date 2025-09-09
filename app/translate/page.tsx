@@ -63,9 +63,21 @@ export default function TranslatePage() {
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
       }
     };
   }, []);
+
+  // Force cleanup when gesture mode changes
+  useEffect(() => {
+    if (!isGestureMode && streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  }, [isGestureMode]);
 
   // Effect to handle video display issues
   useEffect(() => {
@@ -89,10 +101,23 @@ export default function TranslatePage() {
   };
 
   const stopCamera = () => {
+    // Properly stop all camera streams
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+      });
+      streamRef.current = null;
+    }
+    
+    // Clear video element
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    
     setIsVideoActive(false);
     setIsGestureMode(false);
     setLastGesture('');
-    toast.success('Camera stopped');
+    toast.success('🛑 Camera properly stopped');
   };
 
   const handleGestureDetected = useCallback((gesture: string) => {
@@ -471,12 +496,34 @@ export default function TranslatePage() {
       {/* Quick Translation Examples */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Examples & Gesture Guide</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <span>Complete ISL Gesture Reference</span>
+            <span className="text-sm bg-green-100 text-green-700 px-2 py-1 rounded-full">16 Gestures</span>
+          </CardTitle>
           <CardDescription>
-            Try these phrases or learn the gestures
+            All supported gestures and quick demo buttons
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Complete Gestures Reference */}
+          <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <h3 className="font-semibold text-sm mb-3 text-gray-700 dark:text-gray-300">
+              📋 Complete Supported Gestures (16 total):
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+              {Object.entries(gestureToText).map(([gesture, translations]) => (
+                <div key={gesture} className="p-2 bg-white dark:bg-gray-700 rounded border">
+                  <div className="font-medium text-blue-600 dark:text-blue-400">
+                    {gesture.replace('_', ' ').toUpperCase()}
+                  </div>
+                  <div className="text-gray-600 dark:text-gray-400">{translations.english}</div>
+                  <div className="text-gray-500 dark:text-gray-500">{translations.hindi}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Quick Demo Buttons */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {Object.keys(gestureToText).slice(0, 8).map((gesture) => {
               const text = gestureToText[gesture as keyof typeof gestureToText];
@@ -506,10 +553,18 @@ export default function TranslatePage() {
             })}
           </div>
           
-          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              <strong>💡 Pro Tip:</strong> Hold gestures steady for 2 seconds for accurate detection. The system uses stability algorithms to prevent false positives!
-            </p>
+          <div className="mt-4 space-y-3">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                <strong>💡 Pro Tip:</strong> Hold gestures steady for 2 seconds for accurate detection. The system uses stability algorithms to prevent false positives!
+              </p>
+            </div>
+            
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                <strong>🛑 Camera Issue?</strong> If camera doesn't stop properly, refresh the page. This ensures complete MediaStream cleanup.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

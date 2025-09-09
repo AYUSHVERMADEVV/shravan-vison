@@ -60,10 +60,31 @@ export default function GestureRecognition({
   useEffect(() => {
     if (isActive && !isInitialized) {
       initializeMediaPipe();
-    } else if (!isActive && camera) {
-      camera.stop();
+    } else if (!isActive) {
+      cleanup();
     }
   }, [isActive, isInitialized]);
+
+  useEffect(() => {
+    // Cleanup on component unmount
+    return () => {
+      cleanup();
+    };
+  }, []);
+
+  const cleanup = () => {
+    if (camera) {
+      camera.stop();
+      setCamera(null);
+    }
+    if (hands) {
+      hands.close();
+      setHands(null);
+    }
+    setIsInitialized(false);
+    setCurrentGesture(null);
+    setGestureHistory([]);
+  };
 
   const initializeMediaPipe = async () => {
     try {
@@ -97,6 +118,13 @@ export default function GestureRecognition({
         await cameraInstance.start();
         setCamera(cameraInstance);
         setIsInitialized(true);
+        
+        // Add proper cleanup when MediaPipe camera stops
+        cameraInstance.onFrame = async () => {
+          if (videoRef.current && handsInstance && isActive) {
+            await handsInstance.send({ image: videoRef.current });
+          }
+        };
       }
     } catch (error) {
       console.error('MediaPipe initialization error:', error);
