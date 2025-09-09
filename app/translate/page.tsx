@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import GestureRecognition from '@/components/GestureRecognition';
 import { 
   Camera, 
   Mic, 
@@ -16,7 +17,8 @@ import {
   Save, 
   Languages,
   Video,
-  VideoOff
+  VideoOff,
+  Zap
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -30,8 +32,21 @@ export default function TranslatePage() {
   const [isRecording, setIsRecording] = useState(false);
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGestureMode, setIsGestureMode] = useState(false);
+  const [lastGesture, setLastGesture] = useState<string>('');
+  const [gestureConfidence, setGestureConfidence] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  // Gesture to text mapping
+  const gestureToText = {
+    'hello': { english: 'Hello', hindi: 'नमस्ते', isl: '[Wave hand with open palm]' },
+    'thank_you': { english: 'Thank you', hindi: 'धन्यवाद', isl: '[Touch chin, move hand forward]' },
+    'yes': { english: 'Yes', hindi: 'हाँ', isl: '[Nod fist up and down]' },
+    'no': { english: 'No', hindi: 'नहीं', isl: '[Point finger side to side]' },
+    'please': { english: 'Please', hindi: 'कृपया', isl: '[Circular motion on chest]' },
+    'sorry': { english: 'Sorry', hindi: 'माफ करें', isl: '[Circular motion on chest]' }
+  };
 
   useEffect(() => {
     // Cleanup function to stop camera when component unmounts
@@ -58,56 +73,46 @@ export default function TranslatePage() {
   }, [isVideoActive]);
 
   const startCamera = async () => {
-    // Check if browser supports getUserMedia
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      toast.error('Your browser does not support camera access');
-      console.error('getUserMedia is not supported in this browser');
-      return;
-    }
-    
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' }, 
-        audio: false 
-      });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.style.display = 'block';
-        try {
-          await videoRef.current.play();
-        } catch (err) {
-          console.warn("Autoplay blocked:", err);
-          // Try to play again after user interaction
-          videoRef.current.addEventListener('canplay', () => {
-            videoRef.current?.play().catch(e => console.error("Play error:", e));
-          });
-          
-          // Show a message to the user
-          toast('Click on the video to start the camera feed');
-        }
-      }
-      
-      streamRef.current = stream;
-      setIsVideoActive(true);
-      toast.success('Camera started - gesture recognition coming soon!');
-    } catch (error) {
-      toast.error('Camera access denied');
-      console.error('Camera error:', error);
-    }
+    setIsVideoActive(true);
+    setIsGestureMode(true);
+    toast.success('Gesture recognition started!');
   };
 
   const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    
     setIsVideoActive(false);
+    setIsGestureMode(false);
+    setLastGesture('');
+    toast.success('Camera stopped');
+  };
+
+  const handleGestureDetected = useCallback((gesture: string) => {
+    if (gesture && gesture !== lastGesture) {
+      setLastGesture(gesture);
+      
+      // Auto-translate detected gesture based on direction
+      let translatedText = '';
+      if (direction === 'isl_to_english') {
+        translatedText = gestureToText[gesture as keyof typeof gestureToText]?.english || gesture;
+      } else if (direction === 'isl_to_hindi') {
+        translatedText = gestureToText[gesture as keyof typeof gestureToText]?.hindi || gesture;
+      }
+      
+      if (translatedText) {
+        setInputText(`Gesture: ${gesture}`);
+        setOutputText(translatedText);
+        
+        // Auto-speak the translation
+        setTimeout(() => {
+          speakText(translatedText);
+        }, 500);
+        
+        toast.success(`Detected: ${gesture} → ${translatedText}`);
+      }
+    }
+  }, [lastGesture, direction]);
+
+  const handleGestureError = (error: string) => {
+    toast.error(error);
   };
 
   const simulateTranslation = (text: string, dir: TranslationDirection): string => {
@@ -186,11 +191,32 @@ export default function TranslatePage() {
 
   const speakText = (text: string) => {
     if ('speechSynthesis' in window) {
+      // Stop any ongoing speech
+      speechSynthesis.cancel();
+      
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = direction.includes('hindi') ? 'hi-IN' : 'en-US';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      
+      // Add event listeners for better feedback
+      utterance.onstart = () => {
+        toast.success('🔊 Speaking...');
+      };
+      
+      utterance.onend = () => {
+        console.log('Speech finished');
+      };
+      
+      utterance.onerror = (event) => {
+        toast.error('Speech error occurred');
+        console.error('Speech error:', event);
+      };
+      
       speechSynthesis.speak(utterance);
     } else {
-      toast.error('Text-to-speech not supported');
+      toast.error('Text-to-speech not supported in this browser');
     }
   };
 
@@ -272,33 +298,31 @@ export default function TranslatePage() {
           </CardHeader>
           <CardContent>
             <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg mb-4 overflow-hidden relative">
-              {isVideoActive ? (
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  style={{ width: "100%", height: "100%", objectFit: "cover", backgroundColor: "black", display: "block" }}
-                  onLoadedMetadata={() => {
-                    try {
-                      videoRef.current?.play();
-                    } catch (err) {
-                      console.warn("Autoplay blocked:", err);
-                    }
-                  }}
-                  onClick={() => {
-                    // Ensure video plays on user interaction
-                    videoRef.current?.play().catch(err => console.error("Play error:", err));
-                  }}
+              {isGestureMode ? (
+                <GestureRecognition 
+                  isActive={isVideoActive}
+                  onGestureDetected={handleGestureDetected}
+                  onError={handleGestureError}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="text-center">
                     <Camera className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                     <p className="text-gray-500 dark:text-gray-400">
-                      Camera preview will appear here
+                      AI Gesture Recognition ready
+                    </p>
+                    <p className="text-sm text-gray-400 mt-2">
+                      Click "Start Camera" to begin detecting ISL gestures
                     </p>
                   </div>
+                </div>
+              )}
+              
+              {/* Gesture Status Overlay */}
+              {isVideoActive && lastGesture && (
+                <div className="absolute top-2 left-2 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <Zap className="h-3 w-3 inline mr-1" />
+                  {lastGesture.replace('_', ' ').toUpperCase()}
                 </div>
               )}
             </div>
@@ -308,25 +332,31 @@ export default function TranslatePage() {
                 onClick={isVideoActive ? stopCamera : startCamera}
                 variant={isVideoActive ? "destructive" : "default"}
                 className="flex-1"
+                size="lg"
               >
                 {isVideoActive ? (
                   <>
                     <VideoOff className="mr-2 h-4 w-4" />
-                    Stop Camera
+                    Stop Gesture Recognition
                   </>
                 ) : (
                   <>
-                    <Video className="mr-2 h-4 w-4" />
-                    Start Camera
+                    <Zap className="mr-2 h-4 w-4" />
+                    Start AI Gesture Detection
                   </>
                 )}
               </Button>
             </div>
             
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                <strong>Coming Soon:</strong> AI-powered gesture recognition with TensorFlow Lite and MediaPipe integration for real-time ISL detection.
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <p className="text-sm text-green-700 dark:text-green-300">
+                <strong>✨ Live AI Detection:</strong> Real-time ISL gesture recognition using MediaPipe & TensorFlow.js. Supported gestures: Hello, Thank You, Yes, No, Please, Sorry.
               </p>
+              {lastGesture && (
+                <div className="mt-2 text-xs text-green-600 dark:text-green-400">
+                  👁️ Last detected: <strong>{lastGesture.replace('_', ' ')}</strong>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
