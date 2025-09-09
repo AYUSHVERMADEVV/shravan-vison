@@ -8,6 +8,14 @@ const nextConfig = {
     domains: ['images.pexels.com']
   },
   reactStrictMode: true,
+  // Configure for Replit environment
+  devIndicators: {
+    buildActivity: false,
+  },
+  // Allow all hosts for development in Replit
+  async rewrites() {
+    return [];
+  },
   webpack: (config, { isServer }) => {
     // Handle node modules that might cause issues
     config.resolve.fallback = {
