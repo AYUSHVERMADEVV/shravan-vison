@@ -38,24 +38,92 @@ export default function TranslatePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Comprehensive ISL Gesture to text mapping
+  // Comprehensive ISL Gesture to text mapping - Expanded dataset
   const gestureToText = {
+    // Greetings
     'hello': { english: 'Hello', hindi: 'नमस्ते', isl: '[Wave hand with open palm]' },
     'thank_you': { english: 'Thank you', hindi: 'धन्यवाद', isl: '[Touch chin, move hand forward]' },
-    'yes': { english: 'Yes', hindi: 'हाँ', isl: '[Nod fist up and down]' },
-    'no': { english: 'No', hindi: 'नहीं', isl: '[Point finger side to side]' },
+    'good_morning': { english: 'Good Morning', hindi: 'सुप्रभात', isl: '[G sign, then M sign with both hands]' },
+    'good_night': { english: 'Good Night', hindi: 'शुभ रात्रि', isl: '[G sign, then N sign with both hands]' },
     'please': { english: 'Please', hindi: 'कृपया', isl: '[Circular motion on chest]' },
     'sorry': { english: 'Sorry', hindi: 'माफ करें', isl: '[Circular motion on chest]' },
+    'welcome': { english: 'Welcome', hindi: 'स्वागत', isl: '[Open arms gesture]' },
+    'goodbye': { english: 'Goodbye', hindi: 'अलविदा', isl: '[Wave hand]' },
+
+    // Basic Needs
+    'water': { english: 'Water', hindi: 'पानी', isl: '[W sign and touch to mouth]' },
+    'food': { english: 'Food', hindi: 'खाना', isl: '[Hand to mouth motion]' },
+    'bathroom': { english: 'Bathroom', hindi: 'शौचालय', isl: '[T sign and tap twice]' },
+    'medicine': { english: 'Medicine', hindi: 'दवा', isl: '[M sign and tap on wrist]' },
+    'sleep': { english: 'Sleep', hindi: 'नींद', isl: '[Hands together under tilted head]' },
+    'hungry': { english: 'Hungry', hindi: 'भूखा', isl: '[Hand to stomach]' },
+    'thirsty': { english: 'Thirsty', hindi: 'प्यासा', isl: '[W sign to mouth]' },
+    'tired': { english: 'Tired', hindi: 'थका', isl: '[Hand on forehead]' },
+
+    // Emergency
+    'help': { english: 'Help', hindi: 'मदद', isl: '[Open hand raised up]' },
+    'emergency': { english: 'Emergency', hindi: 'आपातकाल', isl: '[Wave both hands frantically]' },
+    'police': { english: 'Police', hindi: 'पुलिस', isl: '[P sign and tap on shoulder]' },
+    'doctor': { english: 'Doctor', hindi: 'डॉक्टर', isl: '[D sign and tap on chest]' },
+    'hospital': { english: 'Hospital', hindi: 'अस्पताल', isl: '[H sign and tap on chest]' },
+    'fire': { english: 'Fire', hindi: 'आग', isl: '[F sign and wave]' },
+    'danger': { english: 'Danger', hindi: 'खतरा', isl: '[D sign and shake]' },
+
+    // People
+    'family': { english: 'Family', hindi: 'परिवार', isl: '[F sign and circle motion]' },
+    'friend': { english: 'Friend', hindi: 'दोस्त', isl: '[Peace sign and tap twice]' },
+    'mother': { english: 'Mother', hindi: 'माँ', isl: '[M sign and tap on chin]' },
+    'father': { english: 'Father', hindi: 'पिता', isl: '[F sign and tap on forehead]' },
+    'brother': { english: 'Brother', hindi: 'भाई', isl: '[B sign and tap on chest]' },
+    'sister': { english: 'Sister', hindi: 'बहन', isl: '[S sign and tap on chest]' },
+    'child': { english: 'Child', hindi: 'बच्चा', isl: '[C sign and tap on head]' },
+    'baby': { english: 'Baby', hindi: 'शिशु', isl: '[Cradle arms motion]' },
+
+    // Emotions
+    'love': { english: 'Love', hindi: 'प्यार', isl: '[Hand on heart]' },
+    'happy': { english: 'Happy', hindi: 'खुश', isl: '[H sign and move up and down]' },
+    'sad': { english: 'Sad', hindi: 'दुखी', isl: '[S sign and move down]' },
+    'angry': { english: 'Angry', hindi: 'गुस्सा', isl: '[A sign and shake hand]' },
+    'scared': { english: 'Scared', hindi: 'डरा हुआ', isl: '[S sign and shake]' },
+    'excited': { english: 'Excited', hindi: 'उत्साहित', isl: '[E sign and wave]' },
+    'surprised': { english: 'Surprised', hindi: 'आश्चर्यचकित', isl: '[S sign and open mouth]' },
+    'worried': { english: 'Worried', hindi: 'चिंतित', isl: '[W sign and tap forehead]' },
+
+    // Numbers
+    'one': { english: 'One', hindi: 'एक', isl: '[Hold up one finger]' },
+    'two': { english: 'Two', hindi: 'दो', isl: '[Hold up two fingers]' },
+    'three': { english: 'Three', hindi: 'तीन', isl: '[Hold up three fingers]' },
+    'four': { english: 'Four', hindi: 'चार', isl: '[Hold up four fingers]' },
+    'five': { english: 'Five', hindi: 'पांच', isl: '[Hold up all five fingers]' },
+    'six': { english: 'Six', hindi: 'छह', isl: '[Six fingers gesture]' },
+    'seven': { english: 'Seven', hindi: 'सात', isl: '[Seven fingers gesture]' },
+    'eight': { english: 'Eight', hindi: 'आठ', isl: '[Eight fingers gesture]' },
+    'nine': { english: 'Nine', hindi: 'नौ', isl: '[Nine fingers gesture]' },
+    'ten': { english: 'Ten', hindi: 'दस', isl: '[Ten fingers gesture]' },
+
+    // Colors
+    'red': { english: 'Red', hindi: 'लाल', isl: '[R sign and tap on lips]' },
+    'blue': { english: 'Blue', hindi: 'नीला', isl: '[B sign and tap on lips]' },
+    'green': { english: 'Green', hindi: 'हरा', isl: '[G sign and tap on lips]' },
+    'yellow': { english: 'Yellow', hindi: 'पीला', isl: '[Y sign and tap on lips]' },
+    'black': { english: 'Black', hindi: 'काला', isl: '[B sign and tap on forehead]' },
+    'white': { english: 'White', hindi: 'सफेद', isl: '[W sign and tap on chest]' },
+    'purple': { english: 'Purple', hindi: 'बैंगनी', isl: '[P sign and tap on lips]' },
+    'orange': { english: 'Orange', hindi: 'नारंगी', isl: '[O sign and tap on lips]' },
+
+    // Common Words
+    'yes': { english: 'Yes', hindi: 'हाँ', isl: '[Nod fist up and down]' },
+    'no': { english: 'No', hindi: 'नहीं', isl: '[Point finger side to side]' },
     'good': { english: 'Good', hindi: 'अच्छा', isl: '[Thumbs up]' },
     'bad': { english: 'Bad', hindi: 'बुरा', isl: '[Thumbs down]' },
-    'help': { english: 'Help', hindi: 'मदद', isl: '[Open hand raised up]' },
-    'water': { english: 'Water', hindi: 'पानी', isl: '[Cup gesture with fingers]' },
-    'food': { english: 'Food', hindi: 'खाना', isl: '[Hand to mouth motion]' },
     'home': { english: 'Home', hindi: 'घर', isl: '[House shape with hands]' },
-    'love': { english: 'Love', hindi: 'प्यार', isl: '[Hand on heart]' },
-    'family': { english: 'Family', hindi: 'परिवार', isl: '[Fingers together]' },
-    'friend': { english: 'Friend', hindi: 'दोस्त', isl: '[Peace sign]' },
-    'work': { english: 'Work', hindi: 'काम', isl: '[Hammering motion]' }
+    'work': { english: 'Work', hindi: 'काम', isl: '[Hammering motion]' },
+    'school': { english: 'School', hindi: 'स्कूल', isl: '[S sign and tap on head]' },
+    'money': { english: 'Money', hindi: 'पैसा', isl: '[M sign and rub fingers]' },
+    'time': { english: 'Time', hindi: 'समय', isl: '[T sign and tap on wrist]' },
+    'today': { english: 'Today', hindi: 'आज', isl: '[T sign and point down]' },
+    'tomorrow': { english: 'Tomorrow', hindi: 'कल', isl: '[T sign and point forward]' },
+    'yesterday': { english: 'Yesterday', hindi: 'कल', isl: '[Y sign and point back]' }
   };
 
   useEffect(() => {
@@ -152,23 +220,218 @@ export default function TranslatePage() {
 
   const simulateTranslation = (text: string, dir: TranslationDirection): string => {
     const translations: Record<string, Record<TranslationDirection, string>> = {
+      // Greetings
       'hello': {
         'isl_to_english': 'Hello',
-        'english_to_isl': '[Gesture: Wave hand with open palm]',
+        'english_to_isl': '👋 Wave your hand with open palm facing forward',
         'isl_to_hindi': 'नमस्ते',
-        'hindi_to_isl': '[Gesture: Join palms together and bow slightly]'
+        'hindi_to_isl': '👋 Wave your hand with open palm facing forward'
       },
       'thank you': {
         'isl_to_english': 'Thank you',
-        'english_to_isl': '[Gesture: Touch chin with fingertips, then move hand forward]',
+        'english_to_isl': '🤝 Touch chin with fingertips, then move hand forward',
         'isl_to_hindi': 'धन्यवाद',
-        'hindi_to_isl': '[Gesture: Touch heart, then extend hands forward]'
+        'hindi_to_isl': '🤝 Touch chin with fingertips, then move hand forward'
       },
+      'good morning': {
+        'isl_to_english': 'Good Morning',
+        'english_to_isl': '🌅 Make "G" sign, then "M" sign with both hands',
+        'isl_to_hindi': 'सुप्रभात',
+        'hindi_to_isl': '🌅 Make "G" sign, then "M" sign with both hands'
+      },
+      'good night': {
+        'isl_to_english': 'Good Night',
+        'english_to_isl': '🌙 Make "G" sign, then "N" sign with both hands',
+        'isl_to_hindi': 'शुभ रात्रि',
+        'hindi_to_isl': '🌙 Make "G" sign, then "N" sign with both hands'
+      },
+      'please': {
+        'isl_to_english': 'Please',
+        'english_to_isl': '🙏 Make circular motion on chest with flat hand',
+        'isl_to_hindi': 'कृपया',
+        'hindi_to_isl': '🙏 Make circular motion on chest with flat hand'
+      },
+      'sorry': {
+        'isl_to_english': 'Sorry',
+        'english_to_isl': '😔 Make circular motion on chest with closed fist',
+        'isl_to_hindi': 'माफ करें',
+        'hindi_to_isl': '😔 Make circular motion on chest with closed fist'
+      },
+
+      // Basic Needs
+      'water': {
+        'isl_to_english': 'Water',
+        'english_to_isl': '💧 Make "W" sign and touch to mouth',
+        'isl_to_hindi': 'पानी',
+        'hindi_to_isl': '💧 Make "W" sign and touch to mouth'
+      },
+      'food': {
+        'isl_to_english': 'Food',
+        'english_to_isl': '🍽️ Touch fingertips to mouth repeatedly',
+        'isl_to_hindi': 'खाना',
+        'hindi_to_isl': '🍽️ Touch fingertips to mouth repeatedly'
+      },
+      'bathroom': {
+        'isl_to_english': 'Bathroom',
+        'english_to_isl': '🚽 Make "T" sign and tap twice',
+        'isl_to_hindi': 'शौचालय',
+        'hindi_to_isl': '🚽 Make "T" sign and tap twice'
+      },
+      'help': {
+        'isl_to_english': 'Help',
+        'english_to_isl': '🆘 Place one hand on top of the other, lift both up',
+        'isl_to_hindi': 'मदद',
+        'hindi_to_isl': '🆘 Place one hand on top of the other, lift both up'
+      },
+
+      // People
+      'family': {
+        'isl_to_english': 'Family',
+        'english_to_isl': '[Gesture: F sign and circle motion]',
+        'isl_to_hindi': 'परिवार',
+        'hindi_to_isl': '[Gesture: F sign and circle motion]'
+      },
+      'friend': {
+        'isl_to_english': 'Friend',
+        'english_to_isl': '[Gesture: Peace sign and tap twice]',
+        'isl_to_hindi': 'दोस्त',
+        'hindi_to_isl': '[Gesture: Peace sign and tap twice]'
+      },
+      'mother': {
+        'isl_to_english': 'Mother',
+        'english_to_isl': '[Gesture: M sign and tap on chin]',
+        'isl_to_hindi': 'माँ',
+        'hindi_to_isl': '[Gesture: M sign and tap on chin]'
+      },
+      'father': {
+        'isl_to_english': 'Father',
+        'english_to_isl': '[Gesture: F sign and tap on forehead]',
+        'isl_to_hindi': 'पिता',
+        'hindi_to_isl': '[Gesture: F sign and tap on forehead]'
+      },
+
+      // Emotions
+      'love': {
+        'isl_to_english': 'Love',
+        'english_to_isl': '[Gesture: Hand on heart]',
+        'isl_to_hindi': 'प्यार',
+        'hindi_to_isl': '[Gesture: Hand on heart]'
+      },
+      'happy': {
+        'isl_to_english': 'Happy',
+        'english_to_isl': '[Gesture: H sign and move up and down]',
+        'isl_to_hindi': 'खुश',
+        'hindi_to_isl': '[Gesture: H sign and move up and down]'
+      },
+      'sad': {
+        'isl_to_english': 'Sad',
+        'english_to_isl': '[Gesture: S sign and move down]',
+        'isl_to_hindi': 'दुखी',
+        'hindi_to_isl': '[Gesture: S sign and move down]'
+      },
+
+      // Numbers
+      'one': {
+        'isl_to_english': 'One',
+        'english_to_isl': '[Gesture: Hold up one finger]',
+        'isl_to_hindi': 'एक',
+        'hindi_to_isl': '[Gesture: Hold up one finger]'
+      },
+      'two': {
+        'isl_to_english': 'Two',
+        'english_to_isl': '[Gesture: Hold up two fingers]',
+        'isl_to_hindi': 'दो',
+        'hindi_to_isl': '[Gesture: Hold up two fingers]'
+      },
+      'three': {
+        'isl_to_english': 'Three',
+        'english_to_isl': '[Gesture: Hold up three fingers]',
+        'isl_to_hindi': 'तीन',
+        'hindi_to_isl': '[Gesture: Hold up three fingers]'
+      },
+      'five': {
+        'isl_to_english': 'Five',
+        'english_to_isl': '[Gesture: Hold up all five fingers]',
+        'isl_to_hindi': 'पांच',
+        'hindi_to_isl': '[Gesture: Hold up all five fingers]'
+      },
+
+      // Colors
+      'red': {
+        'isl_to_english': 'Red',
+        'english_to_isl': '[Gesture: R sign and tap on lips]',
+        'isl_to_hindi': 'लाल',
+        'hindi_to_isl': '[Gesture: R sign and tap on lips]'
+      },
+      'blue': {
+        'isl_to_english': 'Blue',
+        'english_to_isl': '[Gesture: B sign and tap on lips]',
+        'isl_to_hindi': 'नीला',
+        'hindi_to_isl': '[Gesture: B sign and tap on lips]'
+      },
+      'green': {
+        'isl_to_english': 'Green',
+        'english_to_isl': '[Gesture: G sign and tap on lips]',
+        'isl_to_hindi': 'हरा',
+        'hindi_to_isl': '[Gesture: G sign and tap on lips]'
+      },
+
+      // Common Words
+      'yes': {
+        'isl_to_english': 'Yes',
+        'english_to_isl': '[Gesture: Nod fist up and down]',
+        'isl_to_hindi': 'हाँ',
+        'hindi_to_isl': '[Gesture: Nod fist up and down]'
+      },
+      'no': {
+        'isl_to_english': 'No',
+        'english_to_isl': '[Gesture: Point finger side to side]',
+        'isl_to_hindi': 'नहीं',
+        'hindi_to_isl': '[Gesture: Point finger side to side]'
+      },
+      'good': {
+        'isl_to_english': 'Good',
+        'english_to_isl': '[Gesture: Thumbs up]',
+        'isl_to_hindi': 'अच्छा',
+        'hindi_to_isl': '[Gesture: Thumbs up]'
+      },
+      'bad': {
+        'isl_to_english': 'Bad',
+        'english_to_isl': '[Gesture: Thumbs down]',
+        'isl_to_hindi': 'बुरा',
+        'hindi_to_isl': '[Gesture: Thumbs down]'
+      },
+      'home': {
+        'isl_to_english': 'Home',
+        'english_to_isl': '[Gesture: House shape with hands]',
+        'isl_to_hindi': 'घर',
+        'hindi_to_isl': '[Gesture: House shape with hands]'
+      },
+      'work': {
+        'isl_to_english': 'Work',
+        'english_to_isl': '[Gesture: Hammering motion]',
+        'isl_to_hindi': 'काम',
+        'hindi_to_isl': '[Gesture: Hammering motion]'
+      },
+
+      // Common phrases
       'how are you': {
         'isl_to_english': 'How are you?',
         'english_to_isl': '[Gesture: Point to person, then tap chest, then questioning expression]',
         'isl_to_hindi': 'आप कैसे हैं?',
         'hindi_to_isl': '[Gesture: Point to person, show questioning face, then thumbs up/down]'
+      },
+      'i love you': {
+        'isl_to_english': 'I love you',
+        'english_to_isl': '[Gesture: Point to self, then hand on heart, then point to person]',
+        'isl_to_hindi': 'मैं तुमसे प्यार करता हूँ',
+        'hindi_to_isl': '[Gesture: Point to self, then hand on heart, then point to person]'
+      },
+      'what is your name': {
+        'isl_to_english': 'What is your name?',
+        'english_to_isl': '[Gesture: Questioning face, then point to person, then N sign]',
+        'isl_to_hindi': 'आपका नाम क्या है?',
+        'hindi_to_isl': '[Gesture: Questioning face, then point to person, then N sign]'
       }
     };
 
@@ -385,10 +648,13 @@ export default function TranslatePage() {
             
             <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
               <p className="text-sm text-green-700 dark:text-green-300">
-                <strong>🤖 Live AI Detection:</strong> Advanced ISL gesture recognition with stability detection (2-second cooldown). Detects 16+ gestures!
+                <strong>🤖 Live AI Detection:</strong> Advanced ISL gesture recognition with stability detection (8-second cooldown). Detects 60+ gestures!
               </p>
               <div className="mt-2 text-xs text-green-600 dark:text-green-400">
-                <strong>Supported:</strong> Hello, Thank You, Yes, No, Please, Sorry, Good, Bad, Help, Water, Food, Home, Love, Family, Friend, Work
+                <strong>Supported:</strong> Greetings, Basic Needs, Emergency, People, Emotions, Numbers, Colors, and more!
+              </div>
+              <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                <strong>💡 Tip:</strong> Hold gestures steady for 8 seconds for accurate detection. Watch the progress indicator!
               </div>
               {lastGesture && (
                 <div className="mt-2 text-xs text-green-600 dark:text-green-400 font-medium">

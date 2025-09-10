@@ -11,8 +11,8 @@
 Before deploying, make sure you have the following environment variables:
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+NEXT_PUBLIC_SUPABASE_URL=https://ohamqpoblontdzdcyije.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oYW1xcG9ibG9udGR6ZGN5aWplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwOTMzMzgsImV4cCI6MjA3MjY2OTMzOH0.2MEIn0iplhASnya3ADUusAejBwHwRKV5VRwhbSHuBl8
 ```
 
 ## Deployment Steps

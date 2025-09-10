@@ -33,28 +33,96 @@ export default function GestureRecognition({
   const [currentGesture, setCurrentGesture] = useState<string | null>(null);
   
   // Debouncing constants
-  const DETECTION_COOLDOWN = 2000; // 2 seconds between detections
-  const STABILITY_THRESHOLD = 3; // Need 3 consistent detections
-  const CONFIDENCE_THRESHOLD = 0.7;
+  const DETECTION_COOLDOWN = 8000; // 8 seconds between detections (increased to prevent spam)
+  const STABILITY_THRESHOLD = 8; // Need 8 consistent detections (increased for better accuracy)
+  const CONFIDENCE_THRESHOLD = 0.85; // Increased confidence threshold
 
-  // Comprehensive ISL gesture patterns mapping
+  // Comprehensive ISL gesture patterns mapping - Expanded
   const gesturePatterns = {
+    // Greetings
     'hello': detectHelloGesture,
     'thank_you': detectThankYouGesture,
-    'yes': detectYesGesture,
-    'no': detectNoGesture,
+    'good_morning': detectGoodMorningGesture,
+    'good_night': detectGoodNightGesture,
     'please': detectPleaseGesture,
     'sorry': detectSorryGesture,
-    'good': detectGoodGesture,
-    'bad': detectBadGesture,
-    'help': detectHelpGesture,
+    'welcome': detectWelcomeGesture,
+    'goodbye': detectGoodbyeGesture,
+
+    // Basic Needs
     'water': detectWaterGesture,
     'food': detectFoodGesture,
-    'home': detectHomeGesture,
-    'love': detectLoveGesture,
+    'bathroom': detectBathroomGesture,
+    'medicine': detectMedicineGesture,
+    'sleep': detectSleepGesture,
+    'hungry': detectHungryGesture,
+    'thirsty': detectThirstyGesture,
+    'tired': detectTiredGesture,
+
+    // Emergency
+    'help': detectHelpGesture,
+    'emergency': detectEmergencyGesture,
+    'police': detectPoliceGesture,
+    'doctor': detectDoctorGesture,
+    'hospital': detectHospitalGesture,
+    'fire': detectFireGesture,
+    'danger': detectDangerGesture,
+
+    // People
     'family': detectFamilyGesture,
     'friend': detectFriendGesture,
-    'work': detectWorkGesture
+    'mother': detectMotherGesture,
+    'father': detectFatherGesture,
+    'brother': detectBrotherGesture,
+    'sister': detectSisterGesture,
+    'child': detectChildGesture,
+    'baby': detectBabyGesture,
+
+    // Emotions
+    'love': detectLoveGesture,
+    'happy': detectHappyGesture,
+    'sad': detectSadGesture,
+    'angry': detectAngryGesture,
+    'scared': detectScaredGesture,
+    'excited': detectExcitedGesture,
+    'surprised': detectSurprisedGesture,
+    'worried': detectWorriedGesture,
+
+    // Numbers
+    'one': detectOneGesture,
+    'two': detectTwoGesture,
+    'three': detectThreeGesture,
+    'four': detectFourGesture,
+    'five': detectFiveGesture,
+    'six': detectSixGesture,
+    'seven': detectSevenGesture,
+    'eight': detectEightGesture,
+    'nine': detectNineGesture,
+    'ten': detectTenGesture,
+
+    // Colors
+    'red': detectRedGesture,
+    'blue': detectBlueGesture,
+    'green': detectGreenGesture,
+    'yellow': detectYellowGesture,
+    'black': detectBlackGesture,
+    'white': detectWhiteGesture,
+    'purple': detectPurpleGesture,
+    'orange': detectOrangeGesture,
+
+    // Common Words
+    'yes': detectYesGesture,
+    'no': detectNoGesture,
+    'good': detectGoodGesture,
+    'bad': detectBadGesture,
+    'home': detectHomeGesture,
+    'work': detectWorkGesture,
+    'school': detectSchoolGesture,
+    'money': detectMoneyGesture,
+    'time': detectTimeGesture,
+    'today': detectTodayGesture,
+    'tomorrow': detectTomorrowGesture,
+    'yesterday': detectYesterdayGesture
   };
 
   useEffect(() => {
@@ -118,13 +186,6 @@ export default function GestureRecognition({
         await cameraInstance.start();
         setCamera(cameraInstance);
         setIsInitialized(true);
-        
-        // Add proper cleanup when MediaPipe camera stops
-        cameraInstance.onFrame = async () => {
-          if (videoRef.current && handsInstance && isActive) {
-            await handsInstance.send({ image: videoRef.current });
-          }
-        };
       }
     } catch (error) {
       console.error('MediaPipe initialization error:', error);
@@ -180,6 +241,23 @@ export default function GestureRecognition({
           ctx.fillStyle = '#FFD700';
           ctx.font = '14px Arial';
           ctx.fillText(`Stable Detection`, 10, 65);
+        } else if (gestureHistory.length > 0) {
+          // Show learning progress
+          const currentLearningGesture = gestureHistory[gestureHistory.length - 1];
+          const progress = gestureHistory.filter(g => g === currentLearningGesture).length;
+          const percentage = Math.round((progress / STABILITY_THRESHOLD) * 100);
+          
+          ctx.fillStyle = '#FFA500';
+          ctx.font = 'bold 20px Arial';
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 2;
+          ctx.strokeText(`Learning: ${currentLearningGesture.replace('_', ' ').toUpperCase()}`, 10, 40);
+          ctx.fillText(`Learning: ${currentLearningGesture.replace('_', ' ').toUpperCase()}`, 10, 40);
+          
+          // Show progress bar
+          ctx.fillStyle = '#FFA500';
+          ctx.font = '14px Arial';
+          ctx.fillText(`Progress: ${percentage}% (${progress}/${STABILITY_THRESHOLD})`, 10, 65);
         }
       }
     }
@@ -195,7 +273,11 @@ export default function GestureRecognition({
       // Check if we have enough consistent detections
       const consistentGestures = newHistory.filter(g => g === gesture).length;
       
+      // Additional validation: gesture must be detected at least 80% of the time
+      const gesturePercentage = consistentGestures / newHistory.length;
+      
       if (consistentGestures >= STABILITY_THRESHOLD && 
+          gesturePercentage >= 0.8 &&
           now - lastDetectionTime > DETECTION_COOLDOWN &&
           gesture !== currentGesture) {
         
@@ -421,4 +503,520 @@ function detectWorkGesture(landmarks: HandLandmark[], handLabel: string): boolea
   const fingersFolded = fingers.map(i => landmarks[i].y > landmarks[i - 2].y);
   
   return fingersFolded.filter(f => f).length >= 3;
+}
+
+// Additional Greeting Gestures
+function detectGoodMorningGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Good Morning: G sign then M sign (simplified: G sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y > landmarks[10].y;
+}
+
+function detectGoodNightGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Good Night: G sign then N sign (simplified: G sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y > landmarks[10].y;
+}
+
+function detectWelcomeGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Welcome: Open arms gesture (simplified: both hands extended)
+  const fingers = [8, 12, 16, 20];
+  const fingersExtended = fingers.map(i => landmarks[i].y < landmarks[i - 2].y);
+  
+  return fingersExtended.filter(f => f).length >= 3;
+}
+
+function detectGoodbyeGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Goodbye: Wave hand (similar to hello)
+  const fingers = [8, 12, 16, 20];
+  const fingersExtended = fingers.map(i => landmarks[i].y < landmarks[i - 2].y);
+  
+  return fingersExtended.filter(f => f).length >= 3;
+}
+
+// Additional Basic Needs Gestures
+function detectBathroomGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Bathroom: T sign and tap twice (simplified: T sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y < landmarks[10].y;
+}
+
+function detectMedicineGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Medicine: M sign and tap on wrist (simplified: M sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && 
+         middle.y < landmarks[10].y && ring.y < landmarks[14].y;
+}
+
+function detectSleepGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Sleep: Hands together under tilted head (simplified: hands together)
+  const wrist = landmarks[0];
+  const middle = landmarks[9];
+  
+  return Math.abs(wrist.x - 0.5) < 0.1 && wrist.y > 0.5;
+}
+
+function detectHungryGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Hungry: Hand to stomach (simplified: hand position)
+  const wrist = landmarks[0];
+  
+  return wrist.y > 0.6 && wrist.x > 0.3 && wrist.x < 0.7;
+}
+
+function detectThirstyGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Thirsty: W sign to mouth (similar to water)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return index.y < landmarks[6].y && middle.y < landmarks[10].y && 
+         Math.abs(index.x - thumb.x) < 0.15;
+}
+
+function detectTiredGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Tired: Hand on forehead
+  const wrist = landmarks[0];
+  const middle = landmarks[9];
+  
+  return wrist.y < 0.4 && middle.y < landmarks[10].y;
+}
+
+// Additional Emergency Gestures
+function detectEmergencyGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Emergency: Wave both hands frantically (simplified: open hands)
+  const fingers = [8, 12, 16, 20];
+  const fingersExtended = fingers.map(i => landmarks[i].y < landmarks[i - 2].y);
+  
+  return fingersExtended.filter(f => f).length >= 4;
+}
+
+function detectPoliceGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Police: P sign and tap on shoulder (simplified: P sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y > landmarks[10].y;
+}
+
+function detectDoctorGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Doctor: D sign and tap on chest (simplified: D sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y < landmarks[10].y;
+}
+
+function detectHospitalGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Hospital: H sign and tap on chest (simplified: H sign)
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return index.y < landmarks[6].y && middle.y < landmarks[10].y;
+}
+
+function detectFireGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Fire: F sign and wave (simplified: F sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y < landmarks[10].y;
+}
+
+function detectDangerGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Danger: D sign and shake (simplified: D sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y < landmarks[10].y;
+}
+
+// Additional People Gestures
+function detectMotherGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Mother: M sign and tap on chin (simplified: M sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && 
+         middle.y < landmarks[10].y && ring.y < landmarks[14].y;
+}
+
+function detectFatherGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Father: F sign and tap on forehead (simplified: F sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y < landmarks[10].y;
+}
+
+function detectBrotherGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Brother: B sign and tap on chest (simplified: B sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && 
+         middle.y < landmarks[10].y && ring.y < landmarks[14].y;
+}
+
+function detectSisterGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Sister: S sign and tap on chest (simplified: S sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y > landmarks[6].y && 
+         middle.y > landmarks[10].y && ring.y > landmarks[14].y && pinky.y > landmarks[18].y;
+}
+
+function detectChildGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Child: C sign and tap on head (simplified: C sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  
+  return Math.abs(thumb.x - index.x) < 0.1 && Math.abs(index.x - middle.x) < 0.1 &&
+         Math.abs(middle.x - ring.x) < 0.1;
+}
+
+function detectBabyGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Baby: Cradle arms motion (simplified: curved hands)
+  const wrist = landmarks[0];
+  const middle = landmarks[9];
+  
+  return wrist.y > 0.4 && wrist.y < 0.8 && middle.y < landmarks[10].y;
+}
+
+// Additional Emotion Gestures
+function detectHappyGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Happy: H sign and move up and down (simplified: H sign)
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return index.y < landmarks[6].y && middle.y < landmarks[10].y;
+}
+
+function detectSadGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Sad: S sign and move down (simplified: S sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y > landmarks[6].y && 
+         middle.y > landmarks[10].y && ring.y > landmarks[14].y && pinky.y > landmarks[18].y;
+}
+
+function detectAngryGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Angry: A sign and shake hand (simplified: A sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y > landmarks[6].y && 
+         middle.y > landmarks[10].y && ring.y > landmarks[14].y && pinky.y > landmarks[18].y;
+}
+
+function detectScaredGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Scared: S sign and shake (simplified: S sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y > landmarks[6].y && 
+         middle.y > landmarks[10].y && ring.y > landmarks[14].y && pinky.y > landmarks[18].y;
+}
+
+function detectExcitedGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Excited: E sign and wave (simplified: E sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y > landmarks[6].y && 
+         middle.y > landmarks[10].y && ring.y > landmarks[14].y && pinky.y > landmarks[18].y;
+}
+
+function detectSurprisedGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Surprised: S sign and open mouth (simplified: S sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y > landmarks[6].y && 
+         middle.y > landmarks[10].y && ring.y > landmarks[14].y && pinky.y > landmarks[18].y;
+}
+
+function detectWorriedGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Worried: W sign and tap forehead (simplified: W sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && 
+         middle.y < landmarks[10].y && ring.y < landmarks[14].y;
+}
+
+// Number Gestures
+function detectOneGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return index.y < landmarks[6].y && middle.y > landmarks[10].y && 
+         ring.y > landmarks[14].y && pinky.y > landmarks[18].y;
+}
+
+function detectTwoGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return index.y < landmarks[6].y && middle.y < landmarks[10].y && 
+         ring.y > landmarks[14].y && pinky.y > landmarks[18].y;
+}
+
+function detectThreeGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return index.y < landmarks[6].y && middle.y < landmarks[10].y && 
+         ring.y < landmarks[14].y && pinky.y > landmarks[18].y;
+}
+
+function detectFourGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return index.y < landmarks[6].y && middle.y < landmarks[10].y && 
+         ring.y < landmarks[14].y && pinky.y < landmarks[18].y;
+}
+
+function detectFiveGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && 
+         middle.y < landmarks[10].y && ring.y < landmarks[14].y && pinky.y < landmarks[18].y;
+}
+
+function detectSixGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Six: Thumb tucked, other fingers extended
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y < landmarks[6].y && 
+         middle.y < landmarks[10].y && ring.y < landmarks[14].y && pinky.y < landmarks[18].y;
+}
+
+function detectSevenGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Seven: Thumb and index tucked, others extended
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y > landmarks[6].y && 
+         middle.y < landmarks[10].y && ring.y < landmarks[14].y && pinky.y < landmarks[18].y;
+}
+
+function detectEightGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Eight: Thumb, index, middle tucked, others extended
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y > landmarks[6].y && 
+         middle.y > landmarks[10].y && ring.y < landmarks[14].y && pinky.y < landmarks[18].y;
+}
+
+function detectNineGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Nine: Only pinky extended
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y > landmarks[6].y && 
+         middle.y > landmarks[10].y && ring.y > landmarks[14].y && pinky.y < landmarks[18].y;
+}
+
+function detectTenGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Ten: All fingers extended (same as five)
+  return detectFiveGesture(landmarks, handLabel);
+}
+
+// Color Gestures
+function detectRedGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Red: R sign and tap on lips (simplified: R sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y < landmarks[10].y;
+}
+
+function detectBlueGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Blue: B sign and tap on lips (simplified: B sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && 
+         middle.y < landmarks[10].y && ring.y < landmarks[14].y;
+}
+
+function detectGreenGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Green: G sign and tap on lips (simplified: G sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y > landmarks[10].y;
+}
+
+function detectYellowGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Yellow: Y sign and tap on lips (simplified: Y sign)
+  const thumb = landmarks[4];
+  const pinky = landmarks[20];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  
+  return thumb.y < landmarks[3].y && pinky.y < landmarks[18].y && 
+         index.y > landmarks[6].y && middle.y > landmarks[10].y && ring.y > landmarks[14].y;
+}
+
+function detectBlackGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Black: B sign and tap on forehead (simplified: B sign)
+  return detectBlueGesture(landmarks, handLabel);
+}
+
+function detectWhiteGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // White: W sign and tap on chest (simplified: W sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && 
+         middle.y < landmarks[10].y && ring.y < landmarks[14].y;
+}
+
+function detectPurpleGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Purple: P sign and tap on lips (simplified: P sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y > landmarks[10].y;
+}
+
+function detectOrangeGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Orange: O sign and tap on lips (simplified: O sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  
+  return Math.abs(thumb.x - index.x) < 0.05 && Math.abs(index.x - middle.x) < 0.05 &&
+         Math.abs(middle.x - ring.x) < 0.05;
+}
+
+// Additional Common Word Gestures
+function detectSchoolGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // School: S sign and tap on head (simplified: S sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  const pinky = landmarks[20];
+  
+  return thumb.y > landmarks[3].y && index.y > landmarks[6].y && 
+         middle.y > landmarks[10].y && ring.y > landmarks[14].y && pinky.y > landmarks[18].y;
+}
+
+function detectMoneyGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Money: M sign and rub fingers (simplified: M sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  const ring = landmarks[16];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && 
+         middle.y < landmarks[10].y && ring.y < landmarks[14].y;
+}
+
+function detectTimeGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Time: T sign and tap on wrist (simplified: T sign)
+  const thumb = landmarks[4];
+  const index = landmarks[8];
+  const middle = landmarks[12];
+  
+  return thumb.y < landmarks[3].y && index.y < landmarks[6].y && middle.y < landmarks[10].y;
+}
+
+function detectTodayGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Today: T sign and point down (simplified: T sign)
+  return detectTimeGesture(landmarks, handLabel);
+}
+
+function detectTomorrowGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Tomorrow: T sign and point forward (simplified: T sign)
+  return detectTimeGesture(landmarks, handLabel);
+}
+
+function detectYesterdayGesture(landmarks: HandLandmark[], handLabel: string): boolean {
+  // Yesterday: Y sign and point back (simplified: Y sign)
+  return detectYellowGesture(landmarks, handLabel);
 }
